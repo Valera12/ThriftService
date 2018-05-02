@@ -4,7 +4,6 @@ package Client;
 
 import generated.valera.thrift.Article;
 import generated.valera.thrift.Author;
-import generated.valera.thrift.JavaHandbookService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -35,13 +34,13 @@ public class ClientMainFrame extends Application {
     private Controller handler = new Controller();
 
     private HBox buttonBox;
-    private ObservableList<Article> booksList = FXCollections.observableArrayList();
-    private TableView<Article> table = new TableView<>(booksList);
+    private ObservableList<Article> articlesList = FXCollections.observableArrayList();
+    private TableView<Article> table = new TableView<>(articlesList);
 
     private Optional<Article> showAddDialog() {
         Dialog<Article> dialog = new Dialog<>();
         dialog.setTitle("Добавить");
-        dialog.setHeaderText("Добавить книгу");
+        dialog.setHeaderText("Добавить статью");
 
         ButtonType addButtonType = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButtonType = new ButtonType("Отмена", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -52,75 +51,75 @@ public class ClientMainFrame extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        TextField bookID = new TextField();
-        TextField bookName = new TextField();
+        TextField articleID = new TextField();
+        TextField articleTitle = new TextField();
         TextField year = new TextField();
-        TextField authorFirstName = new TextField();
-        TextField authorLastName = new TextField();
-        TextField authorBirthday = new TextField();
+        TextField name = new TextField();
+        TextField surname = new TextField();
+        TextField birthYear = new TextField();
 
         grid.add(new Label("Идентификатор:"), 0, 0);
-        grid.add(bookID, 1, 0);
-        grid.add(new Label("Название:"), 0, 1);
-        grid.add(bookName, 1, 1);
-        grid.add(new Label("Год издания:"), 0, 2);
+        grid.add(articleID, 1, 0);
+        grid.add(new Label("Название статьи:"), 0, 1);
+        grid.add(articleTitle, 1, 1);
+        grid.add(new Label("Год издания статьи:"), 0, 2);
         grid.add(year, 1, 2);
-        grid.add(new Label("Имя автора:"), 0, 3);
-        grid.add(authorFirstName, 1, 3);
-        grid.add(new Label("Фамилия автора:"), 0, 4);
-        grid.add(authorLastName, 1, 4);
-        grid.add(new Label("Год рождения автора:"), 0, 5);
-        grid.add(authorBirthday, 1, 5);
+        grid.add(new Label("Имя издателя:"), 0, 3);
+        grid.add(name, 1, 3);
+        grid.add(new Label("Фамилия издателя:"), 0, 4);
+        grid.add(surname, 1, 4);
+        grid.add(new Label("Год рождения издателя:"), 0, 5);
+        grid.add(birthYear, 1, 5);
 
         Node addButton = dialog.getDialogPane().lookupButton(addButtonType);
         addButton.setDisable(true);
 
         BooleanBinding idInvalid = Bindings.createBooleanBinding(() ->
-                        bookID.getText().trim().isEmpty() || !bookID.getText().chars().allMatch(Character::isDigit),
-                bookID.textProperty()
+                        articleID.getText().trim().isEmpty() || !articleID.getText().chars().allMatch(Character::isDigit),
+                articleID.textProperty()
         );
-        BooleanBinding bookNameInvalid = Bindings.createBooleanBinding(() ->
-                        bookName.getText().trim().isEmpty(),
-                bookName.textProperty()
+        BooleanBinding articleTitleInvalid = Bindings.createBooleanBinding(() ->
+                        articleTitle.getText().trim().isEmpty(),
+                surname.textProperty()
         );
         BooleanBinding yearInvalid = Bindings.createBooleanBinding(() ->
                         year.getText().trim().isEmpty() || !year.getText().chars().allMatch(Character::isDigit),
                 year.textProperty()
         );
-        BooleanBinding authorFirstNameInvalid = Bindings.createBooleanBinding(() ->
-                        authorFirstName.getText().trim().isEmpty(),
-                authorFirstName.textProperty()
+        BooleanBinding nameInvalid = Bindings.createBooleanBinding(() ->
+                        name.getText().trim().isEmpty(),
+                name.textProperty()
         );
-        BooleanBinding authorLastNameInvalid = Bindings.createBooleanBinding(() ->
-                        authorLastName.getText().trim().isEmpty(),
-                authorLastName.textProperty()
+        BooleanBinding surnameInvalid = Bindings.createBooleanBinding(() ->
+                        surname.getText().trim().isEmpty(),
+                surname.textProperty()
         );
-        BooleanBinding authorBirthdayInvalid = Bindings.createBooleanBinding(() ->
-                        authorBirthday.getText().trim().isEmpty() || !authorBirthday.getText().chars().allMatch(Character::isDigit),
-                authorBirthday.textProperty()
+        BooleanBinding birthYearInvalid = Bindings.createBooleanBinding(() ->
+                        birthYear.getText().trim().isEmpty() || !birthYear.getText().chars().allMatch(Character::isDigit),
+                birthYear.textProperty()
         );
 
         addButton.disableProperty().bind(
                 idInvalid
-                        .or(bookNameInvalid)
+                        .or(articleTitleInvalid)
                         .or(yearInvalid)
-                        .or(authorFirstNameInvalid)
-                        .or(authorLastNameInvalid)
-                        .or(authorBirthdayInvalid));
+                        .or(nameInvalid)
+                        .or(surnameInvalid)
+                        .or(birthYearInvalid));
 
         dialog.getDialogPane().setContent(grid);
 
-        Platform.runLater(bookID::requestFocus);
+        Platform.runLater(articleID::requestFocus);
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == addButtonType) {
                 return new Article(
-                        Integer.valueOf(bookID.getText()),
-                        bookName.getText(),
+                        Integer.valueOf(articleID.getText()),
+                        articleTitle.getText(),
                         new Author(
-                                authorFirstName.getText(),
-                                authorLastName.getText(),
-                                Integer.valueOf(authorBirthday.getText())),
+                                name.getText(),
+                                surname.getText(),
+                                Integer.valueOf(birthYear.getText())),
                         Integer.valueOf(year.getText())
                 );
             }
@@ -131,10 +130,10 @@ public class ClientMainFrame extends Application {
     }
 
     private void setupButtons() {
-        Button addButton = new Button("Добавить книгу");
+        Button addButton = new Button("Добавить статью");
         addButton.setOnAction(e -> {
-            Optional<Article> bookInfo = showAddDialog();
-            bookInfo.ifPresent(book -> handler.add(book));
+            Optional<Article> articleInfo = showAddDialog();
+            articleInfo.ifPresent(article -> handler.add(article));
             updateTable();
         });
 
@@ -152,9 +151,9 @@ public class ClientMainFrame extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("Библиотечный справочник");
+        stage.setTitle("Сборник статей на тему \"Java\"");
         Scene scene = new Scene(new VBox());
-        scene.setFill(Color.LIGHTGRAY);
+        scene.setFill(Color.DARKBLUE);
 
         setupButtons();
         setupTable();
@@ -181,28 +180,31 @@ public class ClientMainFrame extends Application {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         idColumn.setSortType(TableColumn.SortType.ASCENDING);
 
-        TableColumn<Article, String> nameColumn = new TableColumn<>("Название");
-        nameColumn.setMinWidth(200);
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setOnEditCommit(t -> {
-            Article book = (t.getTableView().getItems().get(t.getTablePosition().getRow()));
-            book.setTitle(t.getNewValue());
-            handler.edit(book);
+        TableColumn TitleColumn = new TableColumn("Название статьи");
+        TitleColumn.setMinWidth(275);
+
+        TableColumn<Article, String> titleColumn = new TableColumn<>("Название статьи");
+        titleColumn.setMinWidth(100);
+        titleColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getTitle()));
+        titleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        titleColumn.setOnEditCommit(t -> {
+            Article article = t.getRowValue();
+            article.setTitle(String.valueOf(t.getRowValue()));
+            handler.edit(article);
         });
 
-        TableColumn<Article, Integer> yearColumn = new TableColumn<>("Год издания");
+        TableColumn<Article, Integer> yearColumn = new TableColumn<>("Год издания статьи");
         yearColumn.setMinWidth(80);
         yearColumn.setCellValueFactory(new PropertyValueFactory<>("year"));
         yearColumn.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         yearColumn.setOnEditCommit(t -> {
-            Article book = t.getRowValue();
-            book.setYear(t.getNewValue());
-            handler.edit(book);
+            Article article = t.getRowValue();
+            article.setYear(t.getNewValue());
+            handler.edit(article);
         });
 
 
-        TableColumn authorColumn = new TableColumn("Автор");
+        TableColumn authorColumn = new TableColumn("Издатель");
         authorColumn.setMinWidth(275);
 
         TableColumn<Article, String> authorFirstNameColumn = new TableColumn<>("Имя");
@@ -210,9 +212,9 @@ public class ClientMainFrame extends Application {
         authorFirstNameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getAuthor().getName()));
         authorFirstNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         authorFirstNameColumn.setOnEditCommit(t -> {
-            Article book = t.getRowValue();
-            book.getAuthor().setName(t.getNewValue());
-            handler.edit(book);
+            Article article = t.getRowValue();
+            article.getAuthor().setName(t.getNewValue());
+            handler.edit(article);
         });
 
         TableColumn<Article, String> authorLastNameColumn = new TableColumn<>("Фамилия");
@@ -220,9 +222,9 @@ public class ClientMainFrame extends Application {
         authorLastNameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getAuthor().getSurname()));
         authorLastNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         authorLastNameColumn.setOnEditCommit(t -> {
-            Article book = t.getRowValue();
-            book.getAuthor().setSurname(t.getNewValue());
-            handler.edit(book);
+            Article article = t.getRowValue();
+            article.getAuthor().setSurname(t.getNewValue());
+            handler.edit(article);
         });
 
         TableColumn<Article, Integer> authorBirthdayColumn = new TableColumn<>("Год рождения");
@@ -230,26 +232,26 @@ public class ClientMainFrame extends Application {
         authorBirthdayColumn.setCellValueFactory(p -> new SimpleIntegerProperty(p.getValue().getAuthor().getBirthYear()).asObject());
         authorBirthdayColumn.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         authorBirthdayColumn.setOnEditCommit(t -> {
-            Article book = t.getRowValue();
-            book.getAuthor().setBirthYear(t.getNewValue());
-            handler.edit(book);
+            Article article = t.getRowValue();
+            article.getAuthor().setBirthYear(t.getNewValue());
+            handler.edit(article);
         });
 
         authorColumn.getColumns().addAll(authorFirstNameColumn, authorLastNameColumn, authorBirthdayColumn);
-        table.getColumns().addAll(idColumn, nameColumn, yearColumn, authorColumn);
+        table.getColumns().addAll(idColumn, titleColumn, yearColumn, authorColumn);
 
-        BooksContextMenu ctxMenu = new BooksContextMenu(table);
+        ArticlesContextMenu ctxMenu = new ArticlesContextMenu(table);
         table.setContextMenu(ctxMenu);
     }
 
     private void updateTable() {
-        booksList.clear();
-        List<Article> books = handler.getArticle();
-        booksList.addAll(books);
+        articlesList.clear();
+        List<Article> articles = handler.getArticle();
+        this.articlesList.addAll(articles);
     }
 
-    private class BooksContextMenu extends ContextMenu {
-        BooksContextMenu(TableView<Article> table) {
+    private class ArticlesContextMenu extends ContextMenu {
+        ArticlesContextMenu(TableView<Article> table) {
             MenuItem removeItem = new MenuItem("Удалить");
             MenuItem refreshItem = new MenuItem("Обновить");
 
